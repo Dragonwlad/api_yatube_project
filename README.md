@@ -1,9 +1,15 @@
 ## Описание проекта
+
 #Как запустить проект:
+
 Клонировать репозиторий
+
 `git@github.com:Dragonwlad/api_final_yatube.git`
+
  Перейти в него 
+ 
 `cd api_final_yatube`
+
 Cоздать и активировать виртуальное окружение:
 `python -m venv venv`
 `source venv/bin/activate`
