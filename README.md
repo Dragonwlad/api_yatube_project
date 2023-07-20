@@ -37,18 +37,20 @@ http://127.0.0.1:8000/api/v1/posts/
 
 # Добавление новой публикации в коллекцию публикаций
 http://127.0.0.1:8000/api/v1/posts/
+
 Пример вложения:
-`{
+*{
 "text": "string",
 "image": "string",
 "group": 0
-}`
+}*
+
 Пример ответа:
-`{
+*{
 "id": 0,
 "author": "string",
 "text": "string",
 "pub_date": "2019-08-24T14:15:22Z",
 "image": "string",
 "group": 0
-}`
+}*
