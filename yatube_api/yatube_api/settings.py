@@ -18,6 +18,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'django_filters',
+    'djoser',
     'api',
     'posts',
 ]
@@ -92,9 +94,26 @@ STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_PAGINATION_CLASS': None,
+    'PAGE_SIZE': 5,
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=2),
+    'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+SILENCED_SYSTEM_CHECKS = ['models.W001', ]
+''' Пытался отключить ошибку, но не вышло
+?: (rest_framework.W001) You have specified a default PAGE_SIZE pagination rest_framework setting, without specifying also a DEFAULT_PAGINATION_CLASS.
+        HINT: The default for DEFAULT_PAGINATION_CLASS is None. In previous versions this was PageNumberPagination.
+If you wish to define PAGE_SIZE globally whilst defining pagination_class on a per-view basis you may silence this check.
+'''
