@@ -1,19 +1,17 @@
-# TODO:  Напишите свой вариант
 from django.shortcuts import get_object_or_404
-
+from rest_framework import filters, permissions, status, viewsets
 from rest_framework.pagination import LimitOffsetPagination
-
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, status, permissions, filters
 from rest_framework.response import Response
 
-from posts.models import Post, Comment, Group, Follow, User
-from api.serializers import (PostSerializer,
-                             CommentSerializer,
-                             GroupSerializer,
-                             FollowSerializer
-                             )
+from django_filters.rest_framework import DjangoFilterBackend
+
 from api.permissions import AuthorOrAuthenticated
+from api.serializers import (CommentSerializer,
+                             FollowSerializer,
+                             GroupSerializer,
+                             PostSerializer,
+                             )
+from posts.models import Comment, Follow, Group, Post, User
 
 
 class PostViewSet(viewsets.ModelViewSet):
