@@ -52,25 +52,39 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = GroupSerializer
 
 
-class FollowViewSet(viewsets.ViewSet):
+class FollowViewSet(viewsets.ModelViewSet):
 
     permission_classes = (permissions.IsAuthenticated,)
-
+    queryset = Follow.objects.all()
+    serializer_class = FollowSerializer
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     search_fields = ('following__username',)
 
-    def list(self, request):
-        queryset = Follow.objects.all()
-        serializer = FollowSerializer(queryset, many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        queryset = Follow.objects.filter(user=self.request.user)
+        return queryset
 
     def create(self, request):
         follower = request.user
-        following = get_object_or_404(User, username=request.data['following'])
+
+        if 'following' not in request.data:
+            return Response('"following" is requared field',
+                            status.HTTP_400_BAD_REQUEST)
+        following_username = request.data['following']
+        following = get_object_or_404(User, username=following_username)
         if follower == following:
             return Response('You cant follow yourself',
-                            status.HTTP_403_FORBIDDEN)
+                            status.HTTP_400_BAD_REQUEST)
+
+        already_following = Follow.objects.filter(
+            user__username=follower.username,
+            following__username=following_username
+        )
+        if already_following:
+            return Response('You already following this user',
+                            status.HTTP_400_BAD_REQUEST)
+
         serializer = FollowSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(user=follower)
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
