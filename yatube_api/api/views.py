@@ -8,7 +8,11 @@ from rest_framework import viewsets, status, permissions, filters
 from rest_framework.response import Response
 
 from posts.models import Post, Comment, Group, Follow, User
-from api.serializers import PostSerializer, CommentSerializer, GroupSerializer, FollowSerializer
+from api.serializers import (PostSerializer,
+                             CommentSerializer,
+                             GroupSerializer,
+                             FollowSerializer
+                             )
 from api.permissions import AuthorOrAuthenticated
 
 
