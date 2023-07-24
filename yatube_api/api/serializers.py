@@ -55,15 +55,15 @@ class FollowSerializer(serializers.ModelSerializer):
             UniqueTogetherValidator(
                 queryset=Follow.objects.all(),
                 fields=['user', 'following']
-                # Почему то не удалось настроить 'UniqueConstraint',
-                # выдавал ошибку 'UniqueConstraint' object is not callable
             )
         ]
+# Просто докуменация джанго рекомендует использовать
+# UniqueConstraint.
+# Он по какимто причинам нам не подходит тут?
 
-    def validate(self, data):
-        user = self.context['request'].user.username
-        following = str(data['following'])
-        if user == following:
+    def validate_following(self, following):
+        current_user = self.context['request'].user.username
+        if current_user == str(following):
             raise serializers.ValidationError(
                 'You cant follow yourself!')
-        return data
+        return following

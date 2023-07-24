@@ -29,23 +29,18 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (AuthorOrAuthenticated,)
 
-    def check_post(self, post_id):
-        get_object_or_404(Post, id=self.kwargs.get('post_id'))
-        return True
+    def get_post(self, post_id):
+        post = get_object_or_404(Post, id=post_id)
+        return post
 
     def perform_create(self, serializer):
-        if self.check_post(self.kwargs.get('post_id')):
-            post = Post.objects.get(id=self.kwargs.get('post_id'))
-            serializer.save(author=self.request.user, post=post)
-
-    def perform_update(self, serializer):
-        serializer.save(author=self.request.user)
+        post = self.get_post(self.kwargs.get('post_id'))
+        serializer.save(author=self.request.user, post=post)
 
     def get_queryset(self):
-        post_id = self.kwargs.get('post_id')
-        if self.check_post(post_id):
-            new_quaeryset = Comment.objects.filter(post=post_id)
-            return new_quaeryset
+        post = self.get_post(self.kwargs.get('post_id'))
+        new_quaeryset = post.comments
+        return new_quaeryset
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
