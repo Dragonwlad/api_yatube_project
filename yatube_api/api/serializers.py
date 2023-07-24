@@ -57,13 +57,10 @@ class FollowSerializer(serializers.ModelSerializer):
                 fields=['user', 'following']
             )
         ]
-# Просто докуменация джанго рекомендует использовать
-# UniqueConstraint.
-# Он по какимто причинам нам не подходит тут?
 
     def validate_following(self, following):
-        current_user = self.context['request'].user.username
-        if current_user == str(following):
+        current_user = self.context['request'].user
+        if current_user == following:
             raise serializers.ValidationError(
                 'You cant follow yourself!')
         return following
