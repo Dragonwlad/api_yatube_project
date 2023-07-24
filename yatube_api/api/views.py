@@ -1,9 +1,6 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import filters, permissions, status, viewsets
+from rest_framework import filters, permissions, viewsets
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.response import Response
-
-from django_filters.rest_framework import DjangoFilterBackend
 
 from api.permissions import AuthorOrAuthenticated
 from api.serializers import (CommentSerializer,
@@ -11,7 +8,7 @@ from api.serializers import (CommentSerializer,
                              GroupSerializer,
                              PostSerializer,
                              )
-from posts.models import Comment, Follow, Group, Post, User
+from posts.models import Comment, Follow, Group, Post
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -32,17 +29,23 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (AuthorOrAuthenticated,)
 
+    def check_post(self, post_id):
+        get_object_or_404(Post, id=self.kwargs.get('post_id'))
+        return True
+
     def perform_create(self, serializer):
-        post = Post.objects.get(id=self.kwargs.get('post_id'))
-        serializer.save(author=self.request.user, post=post)
+        if self.check_post(self.kwargs.get('post_id')):
+            post = Post.objects.get(self.kwargs.get('post_id'))
+            serializer.save(author=self.request.user, post=post)
 
     def perform_update(self, serializer):
         serializer.save(author=self.request.user)
 
     def get_queryset(self):
         post_id = self.kwargs.get('post_id')
-        new_quaeryset = Comment.objects.filter(post=post_id)
-        return new_quaeryset
+        if self.check_post(post_id):
+            new_quaeryset = Comment.objects.filter(post=post_id)
+            return new_quaeryset
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
@@ -55,34 +58,12 @@ class FollowViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.IsAuthenticated,)
     queryset = Follow.objects.all()
     serializer_class = FollowSerializer
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    filter_backends = (filters.SearchFilter,)
     search_fields = ('following__username',)
 
     def get_queryset(self):
-        queryset = Follow.objects.filter(user=self.request.user)
+        queryset = self.request.user.user
         return queryset
 
-    def create(self, request):
-        follower = request.user
-
-        if 'following' not in request.data:
-            return Response('"following" is requared field',
-                            status.HTTP_400_BAD_REQUEST)
-        following_username = request.data['following']
-        following = get_object_or_404(User, username=following_username)
-        if follower == following:
-            return Response('You cant follow yourself',
-                            status.HTTP_400_BAD_REQUEST)
-
-        already_following = Follow.objects.filter(
-            user__username=follower.username,
-            following__username=following_username
-        )
-        if already_following:
-            return Response('You already following this user',
-                            status.HTTP_400_BAD_REQUEST)
-
-        serializer = FollowSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(user=follower)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

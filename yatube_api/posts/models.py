@@ -32,7 +32,10 @@ class Post(models.Model):
     )
 
     def __str__(self):
-        return self.text
+        return self.text[:15]
+
+    class Meta:
+        ordering = ["-pub_date"]
 
 
 class Comment(models.Model):
@@ -56,3 +59,19 @@ class Follow(models.Model):
         on_delete=models.CASCADE,
         related_name='following'
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'following'],
+                name='unique_follow'),
+            models.CheckConstraint(check=~models.Q(user=models.F('following')),
+                                   name='prevent_self_follow',)
+        ]
+# Почти сам дошел, но все же воспользовался ссылкой, разобрался что такое
+# Q обьект, вроде понял что такое F выражение.. но мне казалось
+# он берет данные из уже существующего обьекта в базе данных, а получается
+# мы уже создали обьект, еще не записали в БД и в этот момент дергаем following
+# из user из проводим проверку?
+# В примере по ссылке в начале еще переопределяется модель User, если я
+# правильно понял, здесь происходит тоже самое, но неявно?
