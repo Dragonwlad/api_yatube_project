@@ -94,5 +94,5 @@ http://127.0.0.1:8000/api/v1/posts/
 
 }*
 
-## Автор проекта Dragonwlad
-https://github.com/Dragonwlad
+## Автор:
+[Владислав Кузнецов](https://github.com/Dragonwlad)
